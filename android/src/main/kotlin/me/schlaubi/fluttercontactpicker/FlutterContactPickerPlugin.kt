@@ -39,7 +39,8 @@ class FlutterContactPickerPlugin : FlutterPlugin, ActivityAware, MethodCallHandl
 
     private inner class ContactPickerDelegate(private val flutterResult: Result) : PluginRegistry.ActivityResultListener {
 
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Boolean {
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+            if(data?.data == null) return true;
             when (requestCode) {
                 PICK_EMAIL -> processContact(data, "email", ::buildEmailAddress)
                 PICK_PHONE -> processContact(data, "phoneNumber", ::buildPhoneNumber)
@@ -48,8 +49,8 @@ class FlutterContactPickerPlugin : FlutterPlugin, ActivityAware, MethodCallHandl
             return true
         }
 
-        private fun processContact(intent: Intent, dataName: String, dataProcessor: (Cursor, Activity) -> Map<String, String>) {
-            val data = intent.data!!
+        private fun processContact(intent: Intent?, dataName: String, dataProcessor: (Cursor, Activity) -> Map<String, String>) {
+            val data = intent?.data!!
             val activityBinding = activityBinding ?: error("Activity missing")
             val activity = activityBinding.activity
             activity.contentResolver.query(data, null, null, null, null).use {
